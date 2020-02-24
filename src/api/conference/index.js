@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询【请填写功能名称】列表
+// 查询会议列表
 export function listConference(query) {
   return request({
     url: '/system/conference/list',
@@ -9,7 +9,7 @@ export function listConference(query) {
   })
 }
 
-// 查询【请填写功能名称】详细
+// 查询会议详细
 export function getConference(conferenceId) {
   return request({
     url: '/system/conference/' + conferenceId,
@@ -17,7 +17,7 @@ export function getConference(conferenceId) {
   })
 }
 
-// 新增【请填写功能名称】
+// 新增会议
 export function addConference(data) {
   return request({
     url: '/system/conference',
@@ -26,7 +26,7 @@ export function addConference(data) {
   })
 }
 
-// 修改【请填写功能名称】
+// 修改会议
 export function updateConference(data) {
   return request({
     url: '/system/conference',
@@ -35,7 +35,7 @@ export function updateConference(data) {
   })
 }
 
-// 删除【请填写功能名称】
+// 删除会议
 export function delConference(conferenceId) {
   return request({
     url: '/system/conference/' + conferenceId,
@@ -43,7 +43,7 @@ export function delConference(conferenceId) {
   })
 }
 
-// 导出【请填写功能名称】
+// 导出会议
 export function exportConference(query) {
   return request({
     url: '/system/conference/export',

@@ -102,6 +102,7 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['system:file:edit']"
+            v-if = false
           >修改</el-button>
           <el-button
             size="mini"
@@ -110,6 +111,12 @@
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:file:remove']"
           >删除</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="handleDownLoad(scope.row)"
+          >下载</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -142,12 +149,14 @@
         <el-form-item>
           <el-upload
             class="upload-demo"
-            action="https://jsonplaceholder.typicode.com/posts/"
+            action="https://scxt.hbhb.vip:9110/common/upload"
             :on-preview="handlePreview"
             :on-remove="handleRemove"
             :before-remove="beforeRemove"
             multiple
             :limit="1"
+            :on-success="handleSuccess"
+            :on-error="handleError"
             :on-exceed="handleExceed"
             :file-list="fileList">
             <el-button size="small" type="primary">点击上传文件</el-button>
@@ -170,7 +179,8 @@
 
 <script>
   import { listFile, getFile, delFile, addFile, updateFile, exportFile } from "@/api/file/fileinfo";
-  import { uploadAvatar } from "@/api/system/user";
+  import { getUserProfile } from "@/api/system/user";
+  import { down } from "@/api/common/common"
 
   export default {
     data() {
@@ -198,27 +208,29 @@
           fileName: undefined,
           upTime: undefined,
           userId: undefined,
-          fileSort: undefined
+          fileSort: undefined,
+          fileUrl: undefined
         },
         // 表单参数
         form: {},
         // 表单校验
         rules: {
           fileName: [
-            { required: true, message: "文件名称不能为空", trigger: "blur" }
+            { required: true, message: "请上传文件", trigger: "blur" }
           ],        upTime: [
-            { required: true, message: "上传时间不能为空", trigger: "blur" }
+            { required: true, message: "请上传文件", trigger: "blur" }
           ],        userId: [
             { required: true, message: "上传者得id不能为空", trigger: "blur" }
           ],        fileSort: [
             { required: true, message: "文件分类不能为空", trigger: "blur" }
           ]
         },
-        fileList: []
+        user: {}
       };
     },
     created() {
       this.getList();
+      this.getUser();
     },
     methods: {
       /** 查询文件列表 */
@@ -276,6 +288,17 @@
           this.form = response.data;
           this.open = true;
           this.title = "修改文件";
+        });
+      },
+      /** 下载当前文件 */
+      handleDownLoad(row){
+        console.log(process.env.VUE_APP_BASE_API+row.fileDownName);
+        down(row.fileUrl).then(response =>{
+          if (response.code === 200){
+            this.msgSuccess("下载成功");
+          }else {
+            this.msgError(response.msg);
+          }
         });
       },
       /** 提交按钮 */
@@ -340,16 +363,7 @@
         console.log(file, fileList);
       },
       handlePreview(file) {
-        uploadAvatar(file).then(response => {
-          if (response.code === 200) {
-            this.fileList = response.
-
-            this.msgSuccess("上传成功");
-          } else {
-            this.msgError(response.msg);
-          }
-          this.$refs.cropper.clearCrop();
-        });
+        console.log(file);
       },
       handleExceed(files, fileList) {
         this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
@@ -357,7 +371,22 @@
       beforeRemove(file, fileList) {
         return this.$confirm(`确定移除 ${ file.name }？`);
       },
-
+      handleSuccess(response, file, fileList){
+        console.log("打印当前上传的文件url"+response.url)
+        this.$message.success("上传成功");
+        this.form.fileName = file.name;
+        this.form.upTime = new Date();
+        this.form.userId = this.user.userId;
+        this.form.fileUrl = response.url;
+      },
+      handleError(err, file, fileList){
+        this.$message.error(err);
+      },
+      getUser() {
+        getUserProfile().then(response => {
+          this.user = response.data;
+        });
+      }
 
     }
   };
